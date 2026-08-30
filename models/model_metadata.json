@@ -2,17 +2,18 @@
   "model_name": "True Doubly Robust AIPW (5-Fold DML)",
   "model_type": "DoublyRobustAIPW",
   "model_version": "1.2.0",
-  "training_timestamp": "2026-08-30T16:16:06.131646Z",
-  "training_samples": 37500,
-  "holdout_samples": 12500,
-  "treatment_ratio": 0.8490666666666666,
-  "is_synthetic_data": true,
-  "qini_lift": "+28.4%",
-  "auuc": 2.492470837751856,
-  "top20_lift": -1.0,
+  "training_timestamp": "2026-08-30T17:17:55.602003+00:00",
+  "dataset": "Criteo AI Uplift Benchmark (v2.1)",
+  "training_samples": 75000,
+  "holdout_samples": 25000,
+  "treatment_ratio": 0.85,
+  "is_synthetic_data": false,
+  "centered_qini_score": 22.7,
+  "bootstrap_95_ci": "[-24.7, 71.7]",
+  "top_decile_gain": "+2.6 visits",
   "segment_thresholds": {
-    "persuadable_p75": 0.00077,
-    "sure_thing_p25": 0.00077,
-    "sleeping_dog_p10": 0.00077
+    "persuadable_p75": 0.00258,
+    "sure_thing_p25": 0.00217,
+    "sleeping_dog_p10": 0.00217
   }
 }
