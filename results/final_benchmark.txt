@@ -1,0 +1,34 @@
+===============================================================================================
+MATHEMATICALLY EXACT CAUSAL MODEL SELECTION TOURNAMENT (CHERNOZHUKOV DML / AIPW)
+Dataset: Criteo AI Uplift Benchmark (100,000 Real Records) | Target: Visit CATE (RCT)
+===============================================================================================
+
+[1/4] Loading and standardizing preprocessed covariate matrices...
+      Training partition: 75,000 | Holdout test partition: 25,000
+      Treatment distribution: 85.0% Treated / 15.0% Control.
+      Total Target Conversions/Visits: 2,484 (2.48% base rate)
+      Data Provenance: Real Criteo Archive Extracted
+
+[2/4] Training candidate causal architectures with regularization...
+      -> Training Single-Model S-Learner (Baseline)...
+         Single-Model S-Learner (Baseline) convergence reached (Train Qini: -8.50).
+      -> Training Two-Model T-Learner (Dual Surface)...
+         Two-Model T-Learner (Dual Surface) convergence reached (Train Qini: 399.90).
+      -> Training True Doubly Robust AIPW (5-Fold DML)...
+         True Doubly Robust AIPW (5-Fold DML) convergence reached (Train Qini: 279.30).
+
+[3/4] Evaluating Radcliffe Centered Qini Curves and Bootstrap Confidence Intervals on Holdout Test Set...
+
+=========================================================================================================
+EMPIRICAL BENCHMARK TOURNAMENT RESULTS TABLE (RADCLIFFE CENTERED QINI ON REAL CRITEO DATA)
+=========================================================================================================
+Candidate Model Architecture             | Train Qini | Test Qini  | 95% Bootstrap CI   | Top-Decile Gain
+---------------------------------------------------------------------------------------------------------
+Single-Model S-Learner (Baseline)        | -8.50      | -20.10     | [-32.3, 33.7]      | +-22.1 visits  
+Two-Model T-Learner (Dual Surface)       | 399.90     | 18.03      | [-33.3, 65.7]      | +-14.7 visits  
+True Doubly Robust AIPW (5-Fold DML)     | 279.30     | 22.70      | [-24.7, 71.7]      | +2.6 visits    
+=========================================================================================================
+
+[4/4] Persisting Champion Model Artifact and Metadata...
+      Champion model artifact saved to: C:\Users\user20\3D Objects\placement\placement\Bucket_5_Business_Intelligence_SQL_and_Causal_Econometrics\Customer-Uplift-Causal-ML\models\champion_uplift_model.joblib
+      Model calibration metadata saved to: C:\Users\user20\3D Objects\placement\placement\Bucket_5_Business_Intelligence_SQL_and_Causal_Econometrics\Customer-Uplift-Causal-ML\models\model_metadata.json

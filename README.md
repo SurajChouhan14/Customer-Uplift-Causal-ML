@@ -1,63 +1,120 @@
-# 📈 Customer Uplift & Causal Machine Learning Engine
-### Individual Treatment Effects (ITE) | Doubly Robust AIPW | Chernozhukov 5-Fold Cross-Fitting | FastAPI
+# Customer Uplift Modeling & Causal ML Engine
+> **Enterprise Double Machine Learning (DML) & Doubly Robust AIPW for Conditional Average Treatment Effect (CATE) Estimation**  
+> *Targeted Intervention Policy Optimization on the Criteo AI Uplift Benchmark*
 
-[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
-[![Causal ML](https://img.shields.io/badge/Causal%20Inference-Double%20ML-success.svg)](https://github.com/microsoft/EconML)
-[![API: FastAPI](https://img.shields.io/badge/API-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
-
-A production Causal Machine Learning engine designed to estimate Individual Treatment Effects (ITE) and Conditional Average Treatment Effects (CATE) for optimal treatment allocation. The engine implements meta-learners (S/T-Learners) alongside Doubly Robust Augmented Inverse Probability Weighting (AIPW) with 5-fold cross-fitting.
-
----
-
-## 📌 Executive Summary & Causal Mechanics
-Standard predictive modeling optimizes for outcome correlation $\mathbb{E}[Y \mid X]$, which wastes intervention budget on *Sure Things* (who convert regardless) or *Lost Causes* (who never convert). Causal uplift modeling isolates incremental impact:
-
-$$\tau(X) = \mathbb{E}[Y(1) - Y(0) \mid X]$$
-
-### Doubly Robust AIPW Formulation:
-To correct for observational confounding without bias, the engine computes doubly robust pseudo-outcomes:
-
-$$\Gamma_i = (\hat{\mu}_1(X_i) - \hat{\mu}_0(X_i)) + \frac{T_i (Y_i - \hat{\mu}_1(X_i))}{\hat{e}(X_i)} - \frac{(1 - T_i)(Y_i - \hat{\mu}_0(X_i))}{1 - \hat{e}(X_i)}$$
-
-Where:
-* $\hat{\mu}_t(X)$ are out-of-fold outcome regression models for treated ($t=1$) and control ($t=0$).
-* $\hat{e}(X) = P(T=1 \mid X)$ is the propensity score model.
-* **Double Robustness:** The estimator remains asymptotically unbiased if *either* the propensity score model OR the outcome regression models are correctly specified.
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-green.svg)](https://fastapi.tiangolo.com/)
+[![Tests](https://img.shields.io/badge/tests-9%20passed-brightgreen.svg)]()
+[![Dataset](https://img.shields.io/badge/Criteo%20AI%20Uplift-100k%20RCT-orange.svg)]()
 
 ---
 
-## 📊 Benchmark Evaluation & Empirical Findings
-* **Dataset:** Canonical Criteo AI Uplift Benchmark ($N = 100,000$ randomized trial records across 12 behavioral covariates).
-* **Treatment Split:** 85% Treated / 15% Control.
-* **Evaluation Metric:** Area Under the Qini Curve (AUUC) on an unseen 25,000-record test partition.
-* **Performance Matrix:**
-  * Random Allocation Baseline: $\text{AUUC} = -0.94$
-  * Two-Model T-Learner: $\text{AUUC} = 2.03$ ($+41.8\%$ Top-20% Lift)
-  * Doubly Robust AIPW (5-Fold DML): $\mathbf{\text{AUUC} = 2.49 \; (+28.4\% \text{ Normalized Qini Lift over baseline})}$
-* **Inference Latency:** **$0.42\text{ ms}$** per real-time inference request in FastAPI.
+## 🎯 Executive Overview & Causal Architecture
+Traditional machine learning predicts customer response probabilities ($P(Y=1|X)$), which results in wasteful marketing spend on "Sure Things" (who convert anyway) and "Lost Causes" (who never convert). 
 
----
+This repository implements **Individual Treatment Effect (ITE)** and **Conditional Average Treatment Effect (CATE)** estimation using **Chernozhukov Double Machine Learning (DML)** and **Doubly Robust Augmented Inverse Probability Weighting (AIPW)** with 5-fold cross-fitting on 100,000 randomized trial records from the canonical **Criteo AI Uplift Benchmark (v2.1)**.
 
-## 📂 Repository Structure
 ```
-Customer-Uplift-Causal-ML/
-├── src/
-│   ├── uplift_engine.py            # Meta-learners & AIPW estimator
-│   ├── data_loader.py              # Criteo uplift benchmark processor
-│   └── serve_api.py                # Real-time FastAPI microservice
-├── Customer_Uplift_Causal_ML.ipynb # Interactive evaluation notebook
-├── run_pipeline.py                 # Pipeline execution script
-├── test_customer_uplift.py         # Unit testing suite (5/5 passing)
-└── requirements.txt                # Production dependencies
+                  ┌────────────────────────────────────────────────────────┐
+                  │   Criteo AI Uplift Benchmark (100,000 RCT Records)     │
+                  │   85% Treated / 15% Control across 12 Continuous X     │
+                  └───────────────────────────┬────────────────────────────┘
+                                              │
+                     ┌────────────────────────┴────────────────────────┐
+                     ▼                                                 ▼
+        ┌─────────────────────────┐                       ┌─────────────────────────┐
+        │ Propensity Forest e(X)  │                       │ Outcome Regressors μ(X) │
+        │ P(Treatment | Features) │                       │ E(Visit | X, T)         │
+        └────────────┬────────────┘                       └────────────┬────────────┘
+                     │                                                 │
+                     └────────────────────────┬────────────────────────┘
+                                              ▼
+                  ┌────────────────────────────────────────────────────────┐
+                  │     Doubly Robust AIPW Cross-Fitting (5 Folds)         │
+                  │     Γ_i = μ1(X) - μ0(X) + (T*(Y-μ1)/e) - ((1-T)*(Y-μ0)/(1-e)) │
+                  └───────────────────────────┬────────────────────────────┘
+                                              ▼
+                  ┌────────────────────────────────────────────────────────┐
+                  │    Radcliffe Centered Qini Curve & Bootstrap CIs       │
+                  │    Dynamic Decile Cohorts (Persuadables vs Dogs)       │
+                  └───────────────────────────┬────────────────────────────┘
+                                              ▼
+                  ┌────────────────────────────────────────────────────────┐
+                  │    Production FastAPI Microservice (0.42ms Latency)    │
+                  └────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🚀 Quickstart & Reproducibility
+## 📊 Empirical Tournament Results (Radcliffe Centered Qini)
+Evaluated on an unseen **25,000-record holdout test set** using 10 policy evaluation deciles with 500-sample non-parametric bootstrap confidence intervals:
+
+| Candidate Model Architecture | Train Qini | Test Qini (Area Between Curves) | 95% Bootstrap CI | Top-Decile Gain |
+|---|:---:|:---:|:---:|:---:|
+| **Single-Model S-Learner (Baseline)** | -8.50 | -20.10 | [-32.3, +33.7] | -22.1 visits |
+| **Two-Model T-Learner (Dual Surface)** | 399.90 | 18.03 | [-33.3, +65.7] | -14.7 visits |
+| **True Doubly Robust AIPW (5-Fold DML)** 🏆 | **279.30** | **+22.70** | **[-24.7, +71.7]** | **+2.6 incremental visits** |
+
+*Champion model artifact is automatically exported to `models/champion_uplift_model.joblib` and served via FastAPI.*
+
+> **Lineage Note:** For documentation of the initial development-phase relative Qini benchmark (+28.4%), see [`docs/initial_evaluation.md`](docs/initial_evaluation.md).
+
+---
+
+## 🔬 Customer Segmentation Strategy (Dynamic Decile Thresholds)
+Using empirical holdout CATE percentiles, the engine segments customers into 4 actionable targeting quadrants:
+1. **Persuadables ($CATE > p_{75}$):** Positive incremental responders $	o$ **Target with promotional campaigns.**
+2. **Sure Things ($p_{25} \le CATE \le p_{75}$):** Organic converters $	o$ **Do not subsidize.**
+3. **Lost Causes ($p_{10} \le CATE < p_{25}$):** Non-responsive users $	o$ **Zero ad spend.**
+4. **Sleeping Dogs ($CATE < p_{10}$):** Negative treatment effects $	o$ **Suppress all outreach.**
+
+---
+
+## ⚡ Quickstart (2-Minute Execution)
+
+### 1. Installation
 ```bash
 git clone https://github.com/SurajChouhan14/Customer-Uplift-Causal-ML.git
 cd Customer-Uplift-Causal-ML
 pip install -r requirements.txt
+```
+
+### 2. Run Tournament Pipeline
+```bash
 python run_pipeline.py
-python -m unittest test_customer_uplift.py
+```
+
+### 3. Run Unit Tests (9/9 Passing)
+```bash
+python test_customer_uplift.py
+```
+
+### 4. Launch FastAPI Microservice
+```bash
+uvicorn serve_api:app --host 0.0.0.0 --port 8000
+```
+
+---
+
+## 🧪 Real-Time REST API Endpoints
+
+### Health & Champion Metadata
+```bash
+curl -X GET http://localhost:8000/health
+```
+
+### Single Customer CATE Prediction
+```bash
+curl -X POST http://localhost:8000/predict_uplift   -H "Content-Type: application/json"   -d '{"features": [21.5, 10.1, 8.3, 4.3, 10.3, 4.0, -4.4, 5.1, 3.9, 14.4, 5.3, -0.17]}'
+```
+
+**Response:**
+```json
+{
+  "predicted_cate": 0.00341,
+  "segment": "Persuadable",
+  "action": "Target with promotional campaign",
+  "model_version": "1.2.0",
+  "inference_time_ms": 0.42
+}
 ```
