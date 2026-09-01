@@ -2,7 +2,7 @@
   "model_name": "True Doubly Robust AIPW (5-Fold DML)",
   "model_type": "DoublyRobustAIPW",
   "model_version": "1.2.0",
-  "training_timestamp": "2026-08-30T17:17:55.602003+00:00",
+  "training_timestamp": "2026-09-01T12:51:04.345617+00:00",
   "dataset": "Criteo AI Uplift Benchmark (v2.1)",
   "training_samples": 75000,
   "holdout_samples": 25000,
